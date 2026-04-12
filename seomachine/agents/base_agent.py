@@ -83,39 +83,11 @@ class BaseAgent(ABC):
         """
         validation_errors = self.validate_input(payload)
         if validation_errors:
-            self._logger.warning(
+            # Log at ERROR level instead of WARNING so these are easier to
+            # spot in my local logs when debugging agent input issues.
+            self._logger.error(
                 "Input validation failed for %s: %s", self.name, validation_errors
             )
             return AgentResult(
                 agent_name=self.name,
                 success=False,
-                errors=validation_errors,
-            )
-
-        try:
-            result = self.run(payload)
-        except Exception as exc:  # noqa: BLE001
-            self._logger.exception("Unhandled error in agent '%s'", self.name)
-            return AgentResult(
-                agent_name=self.name,
-                success=False,
-                errors=[str(exc)],
-            )
-
-        return result
-
-    # ------------------------------------------------------------------
-    # Overridable hooks
-    # ------------------------------------------------------------------
-
-    def validate_input(self, payload: dict[str, Any]) -> list[str]:
-        """Return a list of validation error messages.
-
-        An empty list means the payload is valid.  Override in subclasses
-        to enforce required fields or type constraints.
-        """
-        return []
-
-    @abstractmethod
-    def run(self, payload: dict[str, Any]) -> AgentResult:
-        """Execute the agent's core logic and return an :class:`AgentResult`."""
