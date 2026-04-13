@@ -91,3 +91,26 @@ class BaseAgent(ABC):
             return AgentResult(
                 agent_name=self.name,
                 success=False,
+                errors=validation_errors,
+            )
+
+        try:
+            return self.run(payload)
+        except Exception as exc:  # noqa: BLE001
+            self._logger.exception("Unhandled error in %s.run()", self.name)
+            return AgentResult(
+                agent_name=self.name,
+                success=False,
+                errors=[str(exc)],
+            )
+
+    def validate_input(self, payload: dict[str, Any]) -> list[str]:
+        """Return a list of validation error strings, or an empty list if valid.
+
+        Override in subclasses to add agent-specific input checks.
+        """
+        return []
+
+    @abstractmethod
+    def run(self, payload: dict[str, Any]) -> AgentResult:
+        """Execute the agent's core logic and return an :class:`AgentResult`."""
