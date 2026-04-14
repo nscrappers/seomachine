@@ -105,10 +105,9 @@ class BaseAgent(ABC):
             )
 
     def validate_input(self, payload: dict[str, Any]) -> list[str]:
-        """Return a list of validation error strings for *payload*.
+        """Return a list of validation error strings, or empty list if valid.
 
-        The default implementation performs no checks; subclasses should
-        override this to enforce required fields or value constraints.
+        Override in subclasses to add domain-specific checks.
         """
         return []
 
